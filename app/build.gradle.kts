@@ -100,5 +100,6 @@ dependencies {
 
     implementation("com.googlecode.libphonenumber:libphonenumber:8.12.48")
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("io.coil-kt:coil-compose:2.1.0")
 
 }
