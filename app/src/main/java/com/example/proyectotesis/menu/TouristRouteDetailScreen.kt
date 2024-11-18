@@ -1,4 +1,3 @@
-// TouristRouteDetailScreen.kt
 package com.example.proyectotesis.ui
 
 import androidx.compose.foundation.layout.*
@@ -11,12 +10,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.example.proyectotesis.data.TouristRoute
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.foundation.Image
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.res.painterResource
-import com.example.proyectotesis.R
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +31,7 @@ fun TouristRouteDetailScreen(route: TouristRoute, onBack: () -> Unit) {
             navigationIcon = {
                 IconButton(onClick = { onBack() }) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Volver"
                     )
                 }
@@ -41,14 +40,15 @@ fun TouristRouteDetailScreen(route: TouristRoute, onBack: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Imagen de la ruta
+        // Imagen de la ruta usando el imageUrl
         Image(
-            painter = painterResource(id = R.drawable.nayeon), // Reemplaza "your_local_image" con el ID de tu imagen local
+            painter = rememberAsyncImagePainter(model = route.imageUrl),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
+            alignment = Alignment.Center
         )
 
         // Descripción y otros detalles

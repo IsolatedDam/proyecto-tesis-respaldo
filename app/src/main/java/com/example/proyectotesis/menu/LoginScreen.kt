@@ -6,26 +6,35 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyectotesis.data.LocalUserRepository  // Asegúrate de importar LocalUserRepository
+import com.example.proyectotesis.viewmodel.PersonaViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun LoginScreen(
-    scope: CoroutineScope,
-    onLoginSuccess: () -> Unit,
-    onBackToLoginClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit // Nuevo parámetro para navegar a la pantalla de recuperación
+    viewModel: PersonaViewModel,
+    onLoginSuccess: () -> Unit, // Callback para redirigir tras el inicio de sesión exitoso
+    onForgotPasswordClick: () -> Unit, // Callback para redirigir a la pantalla de recuperación de contraseña
+    onRegisterClick: () -> Unit // Callback para redirigir a la pantalla de registro
 ) {
-    // Variables para almacenar el texto de usuario y contraseña
-    val username = remember { mutableStateOf(TextFieldValue()) }
-    val password = remember { mutableStateOf(TextFieldValue()) }
+    val scope = rememberCoroutineScope()
 
-    // Estado para almacenar el mensaje de error
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    // Estados observables del ViewModel
+    val isLoading by viewModel.isLoading.collectAsState()
+    val statusMessage by viewModel.statusMessage.collectAsState()
+    val authenticatedUser by viewModel.authenticatedUser.collectAsState()
+
+    // Estados locales para los campos de entrada
+    var nombre by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    // Efecto para redirigir al perfil si el usuario está autenticado
+    LaunchedEffect(authenticatedUser) {
+        if (authenticatedUser != null) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -34,68 +43,92 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Título de la pantalla
         Text(
             text = "Iniciar Sesión",
-            fontSize = 24.sp,
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 24.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de texto para el nombre de usuario
+        // Campo de entrada para el nombre de usuario
         OutlinedTextField(
-            value = username.value,
-            onValueChange = { username.value = it },
-            label = { Text("Usuario") },
+            value = nombre,
+            onValueChange = { nombre = it },
+            label = { Text("Nombre de Usuario") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de texto para la contraseña
+        // Campo de entrada para la contraseña
         OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
+            value = password,
+            onValueChange = { password = it },
             label = { Text("Contraseña") },
-            singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para iniciar sesión
+        // Botón de inicio de sesión
         Button(
             onClick = {
-                scope.launch {
-                    if (username.value.text.isEmpty() || password.value.text.isEmpty()) {
-                        errorMessage = "Por favor, completa ambos campos."
-                    } else {
-                        val user = LocalUserRepository.getUser(
-                            username = username.value.text,
-                            password = password.value.text
-                        )
-                        if (user != null) {
-                            onLoginSuccess()
-                        } else {
-                            errorMessage = "Usuario o contraseña incorrectos."
+                if (nombre.isEmpty() || password.isEmpty()) {
+                    viewModel.setStatusMessage("Por favor, completa todos los campos.")
+                } else {
+                    scope.launch {
+                        val isAuthenticated = viewModel.authenticateUser(nombre, password)
+                        if (!isAuthenticated) {
+                            viewModel.setStatusMessage("Error: Nombre de usuario o contraseña incorrectos.")
                         }
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            enabled = !isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
-            Text(text = "Iniciar Sesión")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(text = "Iniciar Sesión")
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Opción de "¿Olvidaste tu contraseña?"
-        TextButton(onClick = { onForgotPasswordClick() }) {
-            Text(text = "¿Olvidaste tu contraseña?")
+        // Opciones adicionales
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(onClick = onForgotPasswordClick) {
+                Text(text = "¿Olvidaste tu contraseña?")
+            }
+            TextButton(onClick = onRegisterClick) {
+                Text(text = "Crear cuenta nueva")
+            }
         }
 
-        // Opción para crear una cuenta nueva
-        TextButton(onClick = { onBackToLoginClick() }) {
-            Text(text = "Crear una cuenta nueva")
+        // Mensaje de estado
+        Spacer(modifier = Modifier.height(16.dp))
+        statusMessage?.let {
+            Text(
+                text = it,
+                color = if (it.contains("correctamente", ignoreCase = true)) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.error
+                },
+                modifier = Modifier.padding(top = 8.dp),
+                fontSize = 14.sp
+            )
         }
     }
 }

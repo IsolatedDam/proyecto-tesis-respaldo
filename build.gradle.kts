@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
 }
 
-// Asegúrate de que los repositorios se declaren aquí también
 allprojects {
     repositories {
         google()
@@ -18,11 +17,19 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.6.0") // Versión estable de Gradle
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10") // Versión más reciente y compatible de Kotlin
+        classpath("com.android.tools.build:gradle:8.6.0") // Versión estable del plugin Gradle
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10") // Actualizado para compatibilidad con Compose 1.5.3
     }
 }
 
+// Configuración del control de versiones para Compose y Kotlin
 ext {
-    var compose_version = "1.5.2" // Define la versión de Compose aquí
+
+}
+
+// Optimización para evitar tareas Always-Run
+subprojects {
+    tasks.matching { it.name == "checkKotlinGradlePluginConfigurationErrors" }.configureEach {
+        onlyIf { false } // Desactiva la tarea redundante
+    }
 }

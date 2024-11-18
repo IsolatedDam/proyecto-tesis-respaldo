@@ -1,11 +1,13 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt") // Necesario para Room y Kapt
+    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" // Plugin necesario para el Compose Compiler
 }
 
 android {
-    compileSdk = 34
+    namespace = "com.example.proyectotesis"
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.proyectotesis"
@@ -13,10 +15,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
-    namespace = "com.example.proyectotesis"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -27,79 +26,71 @@ android {
         jvmTarget = "17"
     }
 
-    packaging {
-        resources {
-            excludes += "/META-INF/NOTICE"
-            excludes += "/META-INF/LICENSE"
-        }
-    }
-
     buildFeatures {
-        compose = true // Habilitar Jetpack Compose
+        compose = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.0" // Cambia a una versión compatible
+        kotlinCompilerExtensionVersion = "1.5.3" // Actualizado
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
-    // Core Android y AppCompat
-    implementation("androidx.core:core-ktx:1.12.0")
+    // Core Android y Jetpack Libraries
+    implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-
-    // Room y Coroutines
-    implementation("androidx.room:room-runtime:2.5.2")
-    kapt("androidx.room:room-compiler:2.5.2") // Kapt para Room
-    implementation("androidx.room:room-ktx:2.5.2") // Para usar coroutines con Room
-
-    // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7") // Corregido para mantener compatibilidad
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-    // Glide
-    implementation("com.github.bumptech.glide:glide:4.15.0")
-    kapt("com.github.bumptech.glide:compiler:4.15.0")
-
-    // Material Design
-    implementation("com.google.android.material:material:1.10.0")
-
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.45")
-    kapt("com.google.dagger:hilt-compiler:2.45")
+    implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Jetpack Compose
-    implementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.11.00"))
     implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.ui:ui-graphics")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    implementation("androidx.navigation:navigation-compose:2.8.4")
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.5") // Actualizado
 
-    // Debugging y UI tools para Compose
+    // Material Design y otros componentes
+    implementation("androidx.compose.material:material:1.7.5")
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+
+    // Koin Dependency Injection
+    implementation("io.insert-koin:koin-android:3.4.1")
+    implementation("io.insert-koin:koin-android-compat:3.4.1")
+    implementation("io.insert-koin:koin-core:3.4.1")
+    implementation("io.insert-koin:koin-androidx-compose:3.4.1")
+
+    // Retrofit y Gson
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // Image Loading
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.firebase.firestore.ktx)
+
+    // Debugging Tools
     debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-tooling-preview")
 
-    // Navigation Component
-    implementation("androidx.navigation:navigation-fragment-ktx:2.7.2")
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.2")
-    implementation("androidx.navigation:navigation-compose:2.7.2")
-
-    // Dependencias de testing
+    // Testing
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    // BCrypt para contraseñas
+    implementation("org.mindrot:jbcrypt:0.4")
 
     //Otras dependencias
 
-    implementation("com.googlecode.libphonenumber:libphonenumber:8.12.48")
-    implementation("androidx.compose.material:material-icons-extended:1.5.0")
-    implementation("io.coil-kt:coil-compose:2.1.0")
-
+    implementation("androidx.media3:media3-common-ktx:1.5.0-rc01")
 }

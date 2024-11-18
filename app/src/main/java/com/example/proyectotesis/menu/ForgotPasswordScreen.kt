@@ -8,17 +8,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
+import com.example.proyectotesis.repository.PersonaRepository
 import kotlinx.coroutines.launch
 
 @Composable
 fun ForgotPasswordScreen(
-    scope: CoroutineScope,
+    personaRepository: PersonaRepository = org.koin.androidx.compose.get(), // Inyección automática
     onBackToLoginClick: () -> Unit
 ) {
-    // Estado para almacenar el correo electrónico ingresado
     val email = remember { mutableStateOf(TextFieldValue()) }
     var message by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -34,7 +34,6 @@ fun ForgotPasswordScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de texto para el correo electrónico
         OutlinedTextField(
             value = email.value,
             onValueChange = { email.value = it },
@@ -44,12 +43,25 @@ fun ForgotPasswordScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para enviar solicitud de recuperación
         Button(
             onClick = {
                 scope.launch {
-                    // Aquí podrías añadir lógica para verificar y enviar un correo de recuperación
-                    message = "Si el correo electrónico es válido, recibirás un enlace para restablecer tu contraseña."
+                    if (email.value.text.isNotEmpty()) {
+                        try {
+                            val personas = personaRepository.getAllPersonas() // Obtener la lista de usuarios
+                            val userExists = personas.any { it.email == email.value.text }
+
+                            message = if (userExists) {
+                                "Si el correo electrónico es válido, recibirás un enlace para restablecer tu contraseña."
+                            } else {
+                                "El correo electrónico no está registrado."
+                            }
+                        } catch (e: Exception) {
+                            message = "Error al enviar la solicitud. Inténtalo más tarde."
+                        }
+                    } else {
+                        message = "Por favor, ingresa un correo electrónico válido."
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -59,18 +71,16 @@ fun ForgotPasswordScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Mostrar mensaje de confirmación o error
         message?.let {
             Text(
                 text = it,
-                color = MaterialTheme.colorScheme.primary,
+                color = if (it.contains("Error")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón para volver al inicio de sesión
         TextButton(onClick = { onBackToLoginClick() }) {
             Text(text = "Volver al inicio de sesión")
         }

@@ -12,13 +12,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.example.proyectotesis.data.TouristRoute
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.res.painterResource
-import com.example.proyectotesis.R
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +37,7 @@ fun TouristRoutesScreen(
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Volver"
                     )
                 }
@@ -71,9 +70,9 @@ fun TouristRouteItem(
                 .padding(16.dp)
                 .clickable { onClick(route) }
         ) {
-            // Imagen local como ejemplo
+            // Cargar imagen desde la URL de la ruta
             Image(
-                painter = painterResource(id = R.drawable.nayeon), // Reemplaza "your_local_image" con el ID de una imagen en drawable
+                painter = rememberAsyncImagePainter(model = route.imageUrl), // Usamos la URL de la ruta
                 contentDescription = null,
                 modifier = Modifier
                     .size(80.dp)

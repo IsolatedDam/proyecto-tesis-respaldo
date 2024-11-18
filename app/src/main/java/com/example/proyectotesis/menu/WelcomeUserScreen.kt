@@ -8,25 +8,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.proyectotesis.ui.theme.Routes
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun WelcomeUserScreen(
     username: String,
     navController: NavHostController
 ) {
-    val scope = rememberCoroutineScope()
-
-    // Iniciar una corrutina que navegue automáticamente al MainMenuScreen después de unos segundos
     LaunchedEffect(Unit) {
-        scope.launch {
-            delay(3000) // Espera de 3 segundos
-            navController.navigate("main_menu") // Navega al menú principal
+        delay(3000) // Espera 3 segundos
+        navController.navigate(Routes.MAIN_MENU) {
+            popUpTo(Routes.WELCOME_USER) { inclusive = true } // Elimina esta pantalla de la pila
         }
     }
 
-    // Contenido de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,9 +36,6 @@ fun WelcomeUserScreen(
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(16.dp))
-        CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary
-        )
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
